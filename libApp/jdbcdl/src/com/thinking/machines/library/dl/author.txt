@@ -1,0 +1,227 @@
+package com.thinking.machines.library.dl;
+import java.io.*;
+import java.util.*;
+import java.sql.*;
+public class AuthorDAO implements AuthorDAOInterface
+{
+private final String dataFileName="author.data";
+private final String tmpDataFileName="tmp.tmp";
+public void add(AuthorInterface author) throws DAOException
+{
+try
+{
+Connection c;
+c=DriverManager.getConnection("jdbc:derby:../../javadb/tmdb");
+// check the exception that will be raised if invalid data is being entered
+PreparedStatement ps;
+ps=c.prepareStatement("select count(*) from author where name=?");
+ps.setString(1,author.getName());
+ResultSet r=ps.executeQuery();
+r.next();
+if(r.getInt(1)>0)
+{
+ps.close();
+c.close();
+r.close();
+throw new DAOException("Invalid Name");
+}
+ps=c.prepareStatement("insert into author (name) values (?)",Statement.RETURN_GENERATED_KEYS);
+ps.setString(1,author.getName());
+ps.executeUpdate();
+r=ps.getGeneratedKeys();
+r.next();
+author.setCode(r.getInt(1));
+r.close();
+ps.close();
+c.close();
+}catch(SQLException sql)
+{
+throw new DAOException(sql.getMessage());
+}
+}
+public void update(AuthorInterface author) throws DAOException
+{
+try
+{
+Connection c;
+c=DriverManager.getConnection("jdbc:derby:../../javadb/tmdb");
+PreparedStatement ps=c.prepareStatement("select count(*) from author where name=? and (code>? or code<?)");
+ps.setString(1,author.getName());
+ps.setInt(2,author.getCode());
+ps.setInt(3,author.getCode());
+ResultSet r=ps.executeQuery();
+r.next();
+if(r.getInt(1)>0)
+{
+r.close();
+c.close();
+ps.close();
+throw new DAOException("Invalid Code");
+}
+ps=c.prepareStatement("update author set name=? where code=?");
+ps.setString(1,author.getName());
+ps.setInt(2,author.getCode());
+ps.executeUpdate();
+ps.close();
+c.close();
+}catch(SQLException sql)
+{
+throw new DAOException("Invalid Code:"+sql.getMessage());
+}
+}
+public void remove(int code) throws DAOException
+{
+try
+{
+Connection c;
+c=DriverManager.getConnection("jdbc:derby:../../javadb/tmdb");
+PreparedStatement ps=c.prepareStatement("select count(*) from author where code=?");
+ResultSet r=ps.executeQuery();
+r.next();
+if(r.getInt(1)==0) 
+{
+r.close();
+c.close();
+ps.close();
+throw new DAOException("Invalid Code");
+}
+ps=c.prepareStatement("delete from author where code=?");
+ps.setInt(1,code);
+ps.executeUpdate();
+ps.close();
+c.close();
+}catch(SQLException sql)
+{
+throw new DAOException("Invalid Code:"+sql.getMessage());
+}
+}
+public AuthorInterface getByCode(int code) throws DAOException
+{
+try
+{
+Connection c;
+c=DriverManager.getConnection("jdbc:derby:../../javadb/tmdb");
+PreparedStatement ps;
+ps=c.prepareStatement("select name from author where code=?");
+ps.setInt(1,code);
+ResultSet r=ps.executeQuery();
+AuthorInterface author=new Author();
+r.next();
+if(r.getInt(1)==0)
+{
+author.setCode(code);
+author.setName(r.getString("name"));
+}
+else 
+{
+r.close();
+ps.close();
+c.close();
+throw new DAOException("Invalid code");
+}
+r.close();
+ps.close();
+c.close();
+return author;
+}catch(SQLException sql)
+{
+throw new DAOException(sql.getMessage());
+}
+}
+public LinkedList<AuthorInterface> getAll() throws DAOException
+{
+try
+{
+LinkedList<AuthorInterface> list=new LinkedList<AuthorInterface>();
+list=this.getAll(AuthorInterface.NAME);
+return list;
+}catch(DAOException sql)
+{
+throw new DAOException(sql.getMessage());
+}
+}
+public LinkedList<AuthorInterface> getAll(AuthorInterface.ATTRIBUTE sortOn) throws DAOException
+{
+try
+{
+LinkedList<AuthorInterface> list=new LinkedList<AuthorInterface>();
+Connection c;
+c=DriverManager.getConnection("jdbc:derby:../../javadb/tmdb");
+PreparedStatement ps;
+if(sortOn==AuthorInterface.CODE) ps=c.prepareStatement("select* from author order by code");
+else ps=c.prepareStatement("select* from author order by name");
+ResultSet r=ps.executeQuery();
+AuthorInterface author;
+if(r.next()==false)
+{
+r.close();
+ps.close();
+c.close();
+throw new DAOException("No Records");
+}
+do
+{
+author=new Author();
+author.setCode(r.getInt("code"));
+author.setName(r.getString("name").trim());
+list.add(author);
+}while(r.next());
+r.close();
+ps.close();
+c.close();
+return list;
+}catch(SQLException sql)
+{
+throw new DAOException(sql.getMessage());
+}
+}
+public AuthorInterface getByName(String name) throws DAOException
+{
+try
+{
+Connection c;
+c=DriverManager.getConnection("jdbc:derby:../../javadb/tmdb");
+PreparedStatement ps;
+ps=c.prepareStatement("select code from author where name=?");
+ps.setString(1,name);
+ResultSet r=ps.executeQuery();
+AuthorInterface author=new Author();
+r.next();
+if(r.getInt(1)==0)
+{
+author.setCode(r.getInt("code"));
+author.setName(name);
+}
+else 
+{
+r.close();
+ps.close();
+c.close();
+throw new DAOException("Invalid Name");
+}
+ps.close();
+c.close();
+return author;
+}catch(SQLException sql)
+{
+throw new DAOException(sql.getMessage());
+}
+}
+public long getCount() throws DAOException
+{
+try
+{
+Connection c=DriverManager.getConnection("jdbc:derby:../../javadb/tmdb");
+PreparedStatement ps=c.prepareStatement("select count(*) from author");
+ResultSet r=ps.executeQuery();
+if(r.next()) return r.getInt(1);
+return 0;
+}catch(SQLException sql)
+{
+throw new DAOException(sql.getMessage());
+}
+}
+}
+
+
+

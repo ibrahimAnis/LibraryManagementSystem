@@ -1,0 +1,4 @@
+Apache Derby
+jdbc:derby:../../javadb/tmdb
+MySQL
+jdbc:mysql://localhost:3306/tmdb

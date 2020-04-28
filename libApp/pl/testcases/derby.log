@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Sat Jun 02 17:15:55 IST 2018:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.11.1.2 - (1629631): instance a816c00e-0163-c051-7aed-000001868838 
+on database directory /home/ibrahim/Practicals/core_java/libApp/javadb/tmdb with class loader sun.misc.Launcher$AppClassLoader@3cd1a2f1 
+Loaded from file:/usr/lib/jvm/java-8-oracle/db/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=1.8.0_171-b11
+user.dir=/home/ibrahim/Practicals/core_java/libApp/pl/testcases
+os.name=Linux
+os.arch=amd64
+os.version=4.13.0-43-generic
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
